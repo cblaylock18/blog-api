@@ -1,0 +1,30 @@
+{
+    "name": "blog-api",
+    "version": "1.0.0",
+    "description": "blog project",
+    "homepage": "https://github.com/cblaylock18/blog-api#readme",
+    "bugs": {
+        "url": "https://github.com/cblaylock18/blog-api/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cblaylock18/blog-api.git"
+    },
+    "license": "ISC",
+    "author": "",
+    "type": "commonjs",
+    "main": "app.js",
+    "scripts": {
+        "start": "node --watch ./app.js"
+    },
+    "devDependencies": {
+        "prisma": "^6.6.0"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.6.0",
+        "dotenv": "^16.4.7",
+        "express": "^5.1.0",
+        "express-validator": "^7.2.1",
+        "uuid": "^11.1.0"
+    }
+}
