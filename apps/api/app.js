@@ -1,40 +1,26 @@
-const prisma = require("./prisma/models/models");
 const express = require("express");
+require("dotenv").config();
+const routes = require("./routes");
 
 const app = express();
 
-const main = async function (email, password, firstName, lastName) {
-    await prisma.user.create({
-        data: {
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
-        },
-    });
-};
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.post("/create-user", (req, res) => {
-    console.log(
-        req.query.email,
-        req.query.password,
-        req.query.firstName,
-        req.query.lastName
-    );
-    main(
-        req.query.email,
-        req.query.password,
-        req.query.firstName,
-        req.query.lastName
-    );
-    res.send({ message: "user was created!" });
+app.use("/user", routes.user);
+
+app.use((err, req, res, next) => {
+    console.error(err);
+
+    const status = err.status || 500;
+    const message =
+        process.env.NODE_ENV === "development"
+            ? err.message
+            : "Internal Server Error";
+
+    res.status(status).json({ error: message });
 });
 
-const viewUsers = async function () {
-    const users = await prisma.user.findMany();
-    console.log(users);
-};
-
-viewUsers();
-
-app.listen(3000, () => console.log("listening on port 3000"));
+app.listen(process.env.PORT, () =>
+    console.log(`Listening on PORT: ${process.env.PORT}`)
+);
