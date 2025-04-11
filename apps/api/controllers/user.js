@@ -72,12 +72,15 @@ const userPost = [
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
+            const author = Boolean(req.body.author) || false;
+
             const newUser = await prisma.user.create({
                 data: {
                     email: req.body.email,
                     password: hashedPassword,
                     firstName: req.body.firstName,
                     lastName: req.body.lastName,
+                    author: author,
                 },
             });
 
