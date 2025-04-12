@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const router = Router();
 
-const post = require("./post");
+const authorPost = require("./authorPost");
+const comment = require("./comment");
 
-router.use("/post", post);
+router.use("/author/post", authorPost);
+router.use("/post/:postId/comment", comment);
 
 module.exports = router;

@@ -40,6 +40,10 @@ app.use((err, req, res, next) => {
     res.status(status).json({ error: message });
 });
 
+app.use((req, res) => {
+    return res.status(404).json({ message: "This route does not exist." });
+});
+
 app.listen(process.env.PORT, () =>
     console.log(`Listening on PORT: ${process.env.PORT}`)
 );

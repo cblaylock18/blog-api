@@ -1,5 +1,6 @@
 const prisma = require("../models");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { body, validationResult } = require("express-validator");
 
 const userValidator = [
@@ -57,7 +58,7 @@ const userValidator = [
 ];
 
 const userPost = [
-    userValidator,
+    ...userValidator,
     async (req, res, next) => {
         const errors = validationResult(req);
 
@@ -84,7 +85,18 @@ const userPost = [
                 },
             });
 
-            res.json({ message: "User was created!", newUser });
+            // pass token (aka login the user) on successful sign up
+            const token = jwt.sign(
+                { email: newUser.email },
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: "30d",
+                }
+            );
+
+            return res
+                .status(200)
+                .json({ message: "User was created!", token });
         } catch (err) {
             console.error("Error while creating user: ", err);
             next(err);

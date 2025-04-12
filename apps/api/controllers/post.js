@@ -1,39 +1,62 @@
 const prisma = require("../models");
-// next step would be to create validation for posting a new article
 
-const postPost = async (req, res) => {
-    const { id, author } = req.user;
+const postAllGet = async (req, res, next) => {
+    const offset = parseInt(req.query.offset) || 0; // default starting at 0
 
-    if (!author) {
-        return res.status(403).json({
-            message:
-                "You are not authorized to create posts. Contact the blog administrator to be made an author.",
-        });
+    try {
+        const allPosts = await prisma.$queryRaw`
+          SELECT "Post".id, 
+                 "Post".title, 
+                 SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview", 
+                 CONCAT("User"."firstName", ' ', "User"."lastName") AS author, 
+                 "Post"."updatedAt"
+          FROM "Post"
+          LEFT JOIN "User" ON "User".id = "Post"."authorId"
+          WHERE "Post".published = true
+          ORDER BY "Post"."updatedAt" DESC
+          LIMIT 10 OFFSET ${offset};
+        `;
+
+        return res.status(200).json({ allPosts });
+    } catch (error) {
+        console.error("Error retrieving posts:", error);
+        next(error);
     }
-
-    const { title, content, published } = req.body;
-
-    const newPost = await prisma.post.create({
-        data: {
-            title,
-            content,
-            published: Boolean(published),
-            author: {
-                connect: {
-                    id,
-                },
-            },
-        },
-    });
-
-    if (!newPost) {
-        throw new Error("Failed to create article.");
-    }
-
-    return res.json({
-        message: "New post created.",
-        post: newPost,
-    });
 };
 
-module.exports = { postPost };
+const postSingleGet = async (req, res, next) => {
+    const postId = req.params.postId;
+
+    try {
+        const post = await prisma.post.findUnique({
+            where: {
+                id: postId,
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+            },
+        });
+
+        if (!post) {
+            return res.status(404).json({
+                message: "No post found that matches. Please try again.",
+            });
+        }
+
+        return res.status(200).json({ post });
+    } catch (error) {
+        console.error("Error retrieving post:", error);
+        next(error);
+    }
+};
+
+module.exports = {
+    postAllGet,
+    postSingleGet,
+};

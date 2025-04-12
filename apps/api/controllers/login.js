@@ -17,7 +17,7 @@ const loginValidator = [
 ];
 
 const loginPost = [
-    loginValidator,
+    ...loginValidator,
     async (req, res, next) => {
         const errors = validationResult(req);
 
@@ -49,7 +49,7 @@ const loginPost = [
 
             if (passwordsMatch) {
                 const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-                    expiresIn: "24h",
+                    expiresIn: "30d",
                 });
                 return res.status(200).json({
                     message: "Logged in successfully.",
