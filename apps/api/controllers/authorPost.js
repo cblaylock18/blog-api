@@ -12,22 +12,82 @@ const sanitizeRichText = (value) => {
 const postValidator = [
     body("title")
         .trim()
-        .optional()
         .isLength({ max: 255 })
         .withMessage("Max title length is 255 characters.")
         .customSanitizer(sanitizeRichText),
     body("content")
-        .trim()
         .optional()
+        .trim()
         .isLength({ max: 65535 })
         .withMessage("Maximum article length is 65535 characters.")
         .customSanitizer(sanitizeRichText),
     body("published")
-        .trim()
         .optional()
+        .trim()
         .isBoolean()
         .withMessage("Published selection must be 'true' or 'false'."),
 ];
+
+const postAllGet = async (req, res, next) => {
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 0;
+    const offset = page * limit;
+    try {
+        const allPosts = await prisma.$queryRaw`
+          SELECT "Post".id, 
+                 "Post".title, 
+                 SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview", 
+                 CONCAT("User"."firstName", ' ', "User"."lastName") AS author, 
+                 "Post"."updatedAt",
+                 "Post".published
+          FROM "Post"
+          LEFT JOIN "User" ON "User".id = "Post"."authorId"
+          WHERE "Post"."authorId" = ${req.user.id}
+          ORDER BY "Post"."updatedAt" DESC
+          LIMIT ${limit} OFFSET ${offset};
+        `;
+
+        return res
+            .status(200)
+            .json({ message: "All posts retrieved.", allPosts });
+    } catch (error) {
+        console.error("Error retrieving posts:", error);
+        next(error);
+    }
+};
+
+const postSingleGet = async (req, res, next) => {
+    const postId = req.params.postId;
+
+    try {
+        const post = await prisma.post.findFirst({
+            where: {
+                id: postId,
+                authorId: req.user.id,
+            },
+            include: {
+                author: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                    },
+                },
+            },
+        });
+
+        if (!post) {
+            return res.status(404).json({
+                message: "No post found that matches. Please try again.",
+            });
+        }
+
+        return res.status(200).json({ message: "Post retrieved.", post });
+    } catch (error) {
+        console.error("Error retrieving post:", error);
+        next(error);
+    }
+};
 
 const postPost = [
     ...postValidator,
@@ -107,7 +167,7 @@ const postPut = [
         }
 
         try {
-            const authorOfPost = await prisma.post.findUnique({
+            const post = await prisma.post.findUnique({
                 where: {
                     id: postId,
                 },
@@ -116,13 +176,13 @@ const postPut = [
                 },
             });
 
-            if (!authorOfPost) {
+            if (!post) {
                 return res.status(404).json({
                     message: "Post not found.",
                 });
             }
 
-            if (authorOfPost.authorId !== id) {
+            if (post.authorId !== id) {
                 return res.status(403).json({
                     message: "This post doesn't belong to you.",
                 });
@@ -174,7 +234,7 @@ const postDelete = async (req, res, next) => {
     }
 
     try {
-        const authorOfPost = await prisma.post.findUnique({
+        const post = await prisma.post.findUnique({
             where: {
                 id: postId,
             },
@@ -183,13 +243,13 @@ const postDelete = async (req, res, next) => {
             },
         });
 
-        if (!authorOfPost) {
+        if (!post) {
             return res.status(404).json({
                 message: "Post not found.",
             });
         }
 
-        if (authorOfPost.authorId !== id) {
+        if (post.authorId !== id) {
             return res.status(403).json({
                 message: "This post doesn't belong to you.",
             });
@@ -215,4 +275,74 @@ const postDelete = async (req, res, next) => {
     }
 };
 
-module.exports = { postPost, postPut, postDelete };
+const postPatch = async (req, res, next) => {
+    const { id, author } = req.user;
+    const postId = req.params.postId;
+
+    if (!author) {
+        return res.status(403).json({
+            message:
+                "You are not authorized to publish posts. Contact the blog administrator to be made an author.",
+        });
+    }
+
+    if (!postId) {
+        return res.status(404).json({
+            message: "This post doesn't exist.",
+        });
+    }
+
+    try {
+        const post = await prisma.post.findUnique({
+            where: {
+                id: postId,
+            },
+            select: {
+                authorId: true,
+                published: true,
+            },
+        });
+
+        if (!post) {
+            return res.status(404).json({
+                message: "Post not found.",
+            });
+        }
+
+        if (post.authorId !== id) {
+            return res.status(403).json({
+                message: "This post doesn't belong to you.",
+            });
+        }
+
+        const togglePublishPost = await prisma.post.update({
+            where: {
+                id: postId,
+            },
+            data: {
+                published: !post.published,
+            },
+        });
+
+        if (!togglePublishPost) {
+            throw new Error("Failed to update post. Database error.");
+        }
+
+        return res.status(200).json({
+            message: "Post updated.",
+            post: togglePublishPost,
+        });
+    } catch (error) {
+        console.error("Error updating post: ", error);
+        next(error);
+    }
+};
+
+module.exports = {
+    postAllGet,
+    postSingleGet,
+    postPost,
+    postPut,
+    postDelete,
+    postPatch,
+};

@@ -1,7 +1,9 @@
 const prisma = require("../models");
 
 const postAllGet = async (req, res, next) => {
-    const offset = parseInt(req.query.offset) || 0; // default starting at 0
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 0;
+    const offset = page * limit;
 
     try {
         const allPosts = await prisma.$queryRaw`
@@ -14,7 +16,7 @@ const postAllGet = async (req, res, next) => {
           LEFT JOIN "User" ON "User".id = "Post"."authorId"
           WHERE "Post".published = true
           ORDER BY "Post"."updatedAt" DESC
-          LIMIT 10 OFFSET ${offset};
+          LIMIT ${limit} OFFSET ${offset};
         `;
 
         return res.status(200).json({ allPosts });
