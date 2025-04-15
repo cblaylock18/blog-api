@@ -9,7 +9,7 @@ const postAllGet = async (req, res, next) => {
         const allPosts = await prisma.$queryRaw`
           SELECT "Post".id, 
                  "Post".title, 
-                 SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview", 
+                 CONCAT(SUBSTRING("Post".content FROM 1 FOR 200),'...') AS "contentPreview", 
                  CONCAT("User"."firstName", ' ', "User"."lastName") AS author, 
                  "Post"."updatedAt"
           FROM "Post"
