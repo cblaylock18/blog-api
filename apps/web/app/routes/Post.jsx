@@ -1,4 +1,4 @@
-import { Welcome } from "../welcome/welcome";
+import { Welcome } from "../components/Nav";
 
 export function meta({}) {
     return [

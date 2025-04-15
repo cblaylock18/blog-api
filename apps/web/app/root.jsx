@@ -7,6 +7,9 @@ import {
     ScrollRestoration,
 } from "react-router";
 
+import { Nav } from "./components/Nav";
+import { Header } from "./components/Header";
+
 import "./app.css";
 
 export const links = () => [
@@ -35,6 +38,8 @@ export function Layout({ children }) {
                 <Links />
             </head>
             <body>
+                <Header />
+                <Nav />
                 {children}
                 <ScrollRestoration />
                 <Scripts />
