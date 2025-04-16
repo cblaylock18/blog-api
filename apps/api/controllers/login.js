@@ -61,8 +61,10 @@ const loginPost = [
                 );
             }
         } catch (err) {
-            err.status = 401;
-            next(err);
+            next({
+                status: 401,
+                errors: [{ msg: err.message }],
+            });
         }
     },
 ];

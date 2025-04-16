@@ -28,16 +28,24 @@ app.use("/", publicRoutes);
 app.use("/", passport.authenticate("jwt", { session: false }), protectedRoutes);
 
 // global error handling
+// global error handling
 app.use((err, req, res, next) => {
     console.error(err);
 
     const status = err.status || 500;
-    const message =
-        process.env.NODE_ENV === "development"
-            ? err.message
-            : "Internal Server Error";
+    const errors =
+        err.errors && Array.isArray(err.errors)
+            ? err.errors
+            : [
+                  {
+                      msg:
+                          process.env.NODE_ENV === "development"
+                              ? err.message
+                              : "Internal Server Error",
+                  },
+              ];
 
-    res.status(status).json({ error: message });
+    res.status(status).json({ errors });
 });
 
 app.use((req, res) => {
