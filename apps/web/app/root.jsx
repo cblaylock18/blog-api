@@ -7,6 +7,7 @@ import {
     ScrollRestoration,
 } from "react-router";
 
+import { AuthProvider } from "./components/AuthProvider";
 import { Nav } from "./components/Nav";
 import { Header } from "./components/Header";
 
@@ -38,10 +39,12 @@ export function Layout({ children }) {
                 <Meta />
                 <Links />
             </head>
-            <body>
-                <Header />
-                <Nav />
-                {children}
+            <body className="max-w-screen-xl mx-auto">
+                <AuthProvider>
+                    <Header />
+                    <Nav />
+                    {children}
+                </AuthProvider>
                 <ScrollRestoration />
                 <Scripts />
             </body>

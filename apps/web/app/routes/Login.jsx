@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useAuth } from "../components/AuthProvider";
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export function meta() {
@@ -11,6 +13,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,12 +24,9 @@ export default function Login() {
         });
         const data = await res.json();
         if (res.ok && data.token) {
-            localStorage.setItem("jwt", data.token);
-            setEmail("");
-            setPassword("");
-            navigate("/");
+            login(data.token);
+            navigate(-1);
         } else {
-            console.log(data);
             if (data.errors && Array.isArray(data.errors)) {
                 setError(data.errors);
             } else {
@@ -44,7 +44,7 @@ export default function Login() {
                     <p key={index} className="text-red-500 mb-4">
                         {err.msg}
                     </p>
-                ))}{" "}
+                ))}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <label htmlFor="email" className="text-xl">
                     Username (Your Email)
@@ -56,6 +56,7 @@ export default function Login() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="border rounded p-2"
+                    autoComplete="username"
                     required
                 />
                 <label htmlFor="password" className="text-xl">
@@ -68,6 +69,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="border rounded p-2"
+                    autoComplete="current-password"
                     required
                 />
                 <button
