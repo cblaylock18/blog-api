@@ -5,4 +5,5 @@ export default [
     route("/post/:postId", "./routes/Post.jsx"),
     route("/login", "./routes/Login.jsx"),
     route("/create-account", "./routes/CreateAccount.jsx"),
+    route("/edit-profile", "./routes/EditProfile.jsx"),
 ];

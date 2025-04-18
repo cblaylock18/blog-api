@@ -150,7 +150,12 @@ const userPost = [
 
             // pass token (aka login the user) on successful sign up
             const token = jwt.sign(
-                { email: newUser.email },
+                {
+                    email: newUser.email,
+                    id: newUser.id,
+                    name: newUser.firstName,
+                    author: newUser.author,
+                },
                 process.env.JWT_SECRET,
                 {
                     expiresIn: "30d",
@@ -162,7 +167,10 @@ const userPost = [
                 .json({ message: "User was created!", token });
         } catch (error) {
             console.error("Error while creating user: ", error);
-            next(error);
+            next({
+                status: 400,
+                errors: [{ msg: error.message }],
+            });
         }
     },
 ];
@@ -185,7 +193,10 @@ const userGet = async (req, res, next) => {
         return res.status(200).json(user);
     } catch (error) {
         console.error("Error retrieving profile: ", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
@@ -231,7 +242,12 @@ const userPut = [
 
             // pass token (aka login the user) on successful update
             const token = jwt.sign(
-                { email: updatedUser.email },
+                {
+                    email: updatedUser.email,
+                    id: updatedUser.id,
+                    name: updatedUser.firstName,
+                    author: updatedUser.author,
+                },
                 process.env.JWT_SECRET,
                 {
                     expiresIn: "30d",
@@ -243,7 +259,10 @@ const userPut = [
                 .json({ message: "User was updated!", token, updatedUser });
         } catch (error) {
             console.error("Error while updating user: ", error);
-            next(error);
+            next({
+                status: 400,
+                errors: [{ msg: error.message }],
+            });
         }
     },
 ];

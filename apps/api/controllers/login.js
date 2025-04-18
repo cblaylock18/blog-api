@@ -48,9 +48,18 @@ const loginPost = [
             );
 
             if (passwordsMatch) {
-                const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-                    expiresIn: "30d",
-                });
+                const token = jwt.sign(
+                    {
+                        email: user.email,
+                        id: user.id,
+                        name: user.firstName,
+                        author: user.author,
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn: "30d",
+                    }
+                );
                 return res.status(200).json({
                     message: "Logged in successfully.",
                     token,
@@ -60,10 +69,10 @@ const loginPost = [
                     "That username and password combination does not exist."
                 );
             }
-        } catch (err) {
+        } catch (error) {
             next({
                 status: 401,
-                errors: [{ msg: err.message }],
+                errors: [{ msg: error.message }],
             });
         }
     },

@@ -77,7 +77,10 @@ const commentPost = [
             });
         } catch (error) {
             console.error("Failed to created comment: ", error);
-            next(error);
+            next({
+                status: 400,
+                errors: [{ msg: error.message }],
+            });
         }
     },
 ];
@@ -154,7 +157,10 @@ const commentPut = [
             });
         } catch (error) {
             console.error("Failed to update comment: ", error);
-            next(error);
+            next({
+                status: 400,
+                errors: [{ msg: error.message }],
+            });
         }
     },
 ];
@@ -220,14 +226,17 @@ const commentDelete = async (req, res, next) => {
         });
     } catch (error) {
         console.error("Failed to delete comment: ", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
 const commentGet = async (req, res, next) => {
     const postId = req.params.postId;
-    const totalCommentsToLoad = parseInt(req.query.offset) || 50; // default starting at 50
-
+    const offset = parseInt(req.query.offset, 10) || 0;
+    const limit = parseInt(req.query.limit, 10) || 10;
     try {
         const post = await prisma.post.findUnique({
             where: {
@@ -239,7 +248,8 @@ const commentGet = async (req, res, next) => {
                     orderBy: {
                         updatedAt: "desc",
                     },
-                    take: totalCommentsToLoad,
+                    skip: offset,
+                    take: limit,
                     select: {
                         id: true,
                         content: true,
@@ -265,7 +275,10 @@ const commentGet = async (req, res, next) => {
         return res.status(200).json({ post });
     } catch (error) {
         console.error("Error retrieving post:", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 

@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useState } from "react";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export function meta({}) {
@@ -24,7 +25,32 @@ export async function loader() {
 }
 
 export default function Home({ loaderData }) {
-    const posts = loaderData;
+    const [posts, setPosts] = useState(loaderData);
+    const [error, setError] = useState(null);
+
+    const batchSize = 10;
+
+    const fetchMorePosts = async (e) => {
+        e.preventDefault();
+
+        const offset = posts.length;
+
+        const res = await fetch(
+            `${apiUrl}/post/?offset=${offset}&limit=${batchSize}`
+        );
+
+        const data = await res.json();
+
+        if (res.ok && data.allPosts) {
+            setPosts((prev) => [...prev, ...data.allPosts]);
+        } else {
+            if (data.errors && Array.isArray(data.errors)) {
+                setError(data.errors);
+            } else {
+                setError(data.message || "Fetching more posts failed");
+            }
+        }
+    };
 
     return (
         <section>
@@ -45,6 +71,21 @@ export default function Home({ loaderData }) {
                     </li>
                 ))}
             </ul>
+            {error &&
+                Array.isArray(error) &&
+                error.map((err, index) => (
+                    <p key={index} className="text-red-500 mb-4">
+                        {err.msg}
+                    </p>
+                ))}
+            {posts.length % batchSize === 0 && posts.length > 0 && (
+                <button
+                    onClick={fetchMorePosts}
+                    className="self-start bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 ml-6 mb-4 rounded cursor-pointer"
+                >
+                    Load 10 More Posts
+                </button>
+            )}
         </section>
     );
 }

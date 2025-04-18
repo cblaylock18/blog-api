@@ -2,8 +2,7 @@ const prisma = require("../models");
 
 const postAllGet = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 0;
-    const offset = page * limit;
+    const offset = parseInt(req.query.offset, 10) || 0;
 
     try {
         const allPosts = await prisma.$queryRaw`
@@ -22,7 +21,10 @@ const postAllGet = async (req, res, next) => {
         return res.status(200).json({ allPosts });
     } catch (error) {
         console.error("Error retrieving posts:", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
@@ -54,7 +56,10 @@ const postSingleGet = async (req, res, next) => {
         return res.status(200).json({ post });
     } catch (error) {
         console.error("Error retrieving post:", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 

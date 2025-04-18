@@ -41,7 +41,7 @@ export default function Post({ loaderData }) {
     return (
         <section>
             <Article post={post}></Article>
-            <Comments comments={comments} postId={post.id} />
+            <Comments commentsInitial={comments} postId={post.id} />
         </section>
     );
 }

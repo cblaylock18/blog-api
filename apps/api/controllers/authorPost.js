@@ -52,7 +52,10 @@ const postAllGet = async (req, res, next) => {
             .json({ message: "All posts retrieved.", allPosts });
     } catch (error) {
         console.error("Error retrieving posts:", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
@@ -85,7 +88,10 @@ const postSingleGet = async (req, res, next) => {
         return res.status(200).json({ message: "Post retrieved.", post });
     } catch (error) {
         console.error("Error retrieving post:", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
@@ -210,8 +216,11 @@ const postPut = [
                 post: updatedPost,
             });
         } catch (error) {
-            console.error("Error updated post: ", error);
-            next(error);
+            console.error("Error updating post: ", error);
+            next({
+                status: 400,
+                errors: [{ msg: error.message }],
+            });
         }
     },
 ];
@@ -271,7 +280,10 @@ const postDelete = async (req, res, next) => {
         });
     } catch (error) {
         console.error("Error deleting post: ", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
@@ -334,7 +346,10 @@ const postPatch = async (req, res, next) => {
         });
     } catch (error) {
         console.error("Error updating post: ", error);
-        next(error);
+        next({
+            status: 400,
+            errors: [{ msg: error.message }],
+        });
     }
 };
 
