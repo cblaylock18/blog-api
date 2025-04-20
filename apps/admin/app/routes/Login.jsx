@@ -13,18 +13,24 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { user, login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const res = await fetch(`${apiUrl}/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
         });
+
         const data = await res.json();
+
         if (res.ok && data.token) {
             login(data.token);
+            if (!data.user.author) {
+                navigate("/edit-profile");
+            }
             navigate("/");
         } else {
             if (data.errors && Array.isArray(data.errors)) {
@@ -45,6 +51,13 @@ export default function Login() {
                         {err.msg}
                     </p>
                 ))}
+            {user ? (
+                ""
+            ) : (
+                <p className="text-red-500 mb-4">
+                    Must be logged in to access this site.
+                </p>
+            )}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <label htmlFor="email" className="text-xl">
                     Username (Your Email)

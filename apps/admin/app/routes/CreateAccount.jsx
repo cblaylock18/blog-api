@@ -36,7 +36,11 @@ export default function CreateAccount() {
         const data = await res.json();
         if (res.ok && data.token) {
             login(data.token);
-            navigate("/");
+            if (!author) {
+                navigate("/edit-profile");
+            } else {
+                navigate("/");
+            }
         } else {
             if (data.errors && Array.isArray(data.errors)) {
                 setError(data.errors);
@@ -93,6 +97,7 @@ export default function CreateAccount() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="border rounded p-2"
+                    autoComplete="new-password"
                     required
                 />
                 <label htmlFor="firstName" className="text-xl">

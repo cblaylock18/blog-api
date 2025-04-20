@@ -12,11 +12,13 @@ export function Nav() {
                 </li>
                 {user ? (
                     <>
+                        <li>
+                            <NavLink to="/new-post">New Post</NavLink>
+                        </li>
                         <li className="ml-auto">Hi, {user.name}</li>
                         <li>
                             <NavLink to="/edit-profile">Profile</NavLink>
                         </li>
-                        {user.author ? <a href="/">Blog Author Site</a> : ""}
                         <button onClick={logout} className="cursor-pointer">
                             Log Out
                         </button>
@@ -24,7 +26,7 @@ export function Nav() {
                 ) : (
                     <>
                         <li className="ml-auto">
-                            <NavLink to="/">Login</NavLink>
+                            <NavLink to="/login">Login</NavLink>
                         </li>
                         <li>
                             <NavLink to="/create-account">

@@ -54,7 +54,8 @@ const userValidator = [
         .optional()
         .trim()
         .isBoolean()
-        .withMessage("Author selection must be 'true' or 'false'."),
+        .withMessage("Author selection must be 'true' or 'false'.")
+        .toBoolean(),
 ];
 
 const updateValidator = [
@@ -115,7 +116,8 @@ const updateValidator = [
         .optional()
         .trim()
         .isBoolean()
-        .withMessage("Author selection must be 'true' or 'false'."),
+        .withMessage("Author selection must be 'true' or 'false'.")
+        .toBoolean(),
 ];
 
 const userPost = [
@@ -222,7 +224,7 @@ const userPut = [
         }
 
         try {
-            if (req.body.password !== undefined) {
+            if (req.body.password !== "") {
                 dataToUpdate.password = await bcrypt.hash(
                     req.body.password,
                     10

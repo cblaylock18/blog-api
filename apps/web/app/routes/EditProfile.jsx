@@ -72,7 +72,7 @@ export default function EditProfile({ loaderData }) {
 
         if (res.ok && data.token) {
             login(data.token);
-            navigate(-1);
+            navigate("/");
         } else {
             if (data.errors && Array.isArray(data.errors)) {
                 setError(data.errors);
@@ -166,7 +166,7 @@ export default function EditProfile({ loaderData }) {
                     type="submit"
                     className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
                 >
-                    Update Account and Log In
+                    Update Account
                 </button>
             </form>
         </main>

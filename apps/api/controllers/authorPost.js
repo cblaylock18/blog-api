@@ -25,27 +25,34 @@ const postValidator = [
         .optional()
         .trim()
         .isBoolean()
-        .withMessage("Published selection must be 'true' or 'false'."),
+        .withMessage("Published selection must be 'true' or 'false'.")
+        .toBoolean(),
 ];
 
 const postAllGet = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 0;
-    const offset = page * limit;
+    const offset = parseInt(req.query.offset, 10) || 0;
+
     try {
         const allPosts = await prisma.$queryRaw`
-          SELECT "Post".id, 
-                 "Post".title, 
-                 SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview", 
-                 CONCAT("User"."firstName", ' ', "User"."lastName") AS author, 
-                 "Post"."updatedAt",
-                 "Post".published
-          FROM "Post"
-          LEFT JOIN "User" ON "User".id = "Post"."authorId"
-          WHERE "Post"."authorId" = ${req.user.id}
-          ORDER BY "Post"."updatedAt" DESC
-          LIMIT ${limit} OFFSET ${offset};
-        `;
+        SELECT 
+          "Post".id,
+          "Post".title,
+          regexp_replace(
+            SUBSTRING("Post".content FROM 1 FOR 200),
+            '<[^>]+>',
+            '',
+            'g'
+          ) AS "contentPreview",
+          CONCAT("User"."firstName", ' ', "User"."lastName") AS author,
+          "Post"."updatedAt",
+          "Post".published
+        FROM "Post"
+        LEFT JOIN "User" ON "User".id = "Post"."authorId"
+        WHERE "Post"."authorId" = ${req.user.id}
+        ORDER BY "Post"."updatedAt" DESC
+        LIMIT ${limit} OFFSET ${offset};
+      `;
 
         return res
             .status(200)
