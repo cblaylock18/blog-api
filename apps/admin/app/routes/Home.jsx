@@ -172,7 +172,7 @@ export default function Home() {
                                         post.published
                                     )}
                                     disabled={loadingMore}
-                                    className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                                    className="px-3 py-1 border rounded hover:bg-black-700 disabled:opacity-50"
                                 >
                                     {post.published ? "Unpublish" : "Publish"}
                                 </button>

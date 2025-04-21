@@ -24,7 +24,7 @@ export function Nav() {
                 ) : (
                     <>
                         <li className="ml-auto">
-                            <NavLink to="/">Login</NavLink>
+                            <NavLink to="/login">Login</NavLink>
                         </li>
                         <li>
                             <NavLink to="/create-account">
