@@ -16,22 +16,19 @@ export default function PostEdit() {
     const { user, token } = useAuth();
     const navigate = useNavigate();
 
-    // — Post form state —
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [published, setPublished] = useState(false);
 
-    // — Comments state —
     const [comments, setComments] = useState([]);
     const [loadingComments, setLoadingComments] = useState(true);
     const [newBody, setNewBody] = useState("");
     const [posting, setPosting] = useState(false);
 
-    // 1) Load the post on mount
     useEffect(() => {
-        if (token === undefined) return; // still initializing
+        if (token === undefined) return;
         if (!token) {
             navigate("/login", { replace: true });
             return;
@@ -56,7 +53,6 @@ export default function PostEdit() {
         })();
     }, [postId, token, navigate]);
 
-    // 2) Fetch comments (wrapped so we can re‑call after adding/updating)
     const loadComments = useCallback(async () => {
         if (!token) return;
         setLoadingComments(true);
@@ -78,7 +74,6 @@ export default function PostEdit() {
         if (!loading && token) loadComments();
     }, [loading, token, loadComments]);
 
-    // 3) Save post edits
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -99,7 +94,6 @@ export default function PostEdit() {
         }
     };
 
-    // 4) Add new comment
     const handleAddComment = async (e) => {
         e.preventDefault();
         if (!newBody.trim()) return;
@@ -124,7 +118,6 @@ export default function PostEdit() {
         }
     };
 
-    // 5) Delete a comment
     const handleDeleteComment = (commentId) => async (e) => {
         e.preventDefault();
         try {
@@ -143,7 +136,6 @@ export default function PostEdit() {
         }
     };
 
-    // 6) Update a comment
     const handleUpdateComment = (commentId, newBody) => async (e) => {
         e.preventDefault();
         try {
@@ -166,14 +158,12 @@ export default function PostEdit() {
         }
     };
 
-    // — Render —
     if (loading) {
         return <p className="p-6">Loading post…</p>;
     }
 
     return (
         <main className="container mx-auto p-6 space-y-8">
-            {/* ─── Post Edit Form ─── */}
             {error?.map((e, i) => (
                 <p key={i} className="text-red-500">
                     {e.msg}
@@ -205,7 +195,7 @@ export default function PostEdit() {
                     <label className="font-semibold">Body</label>
                     <Editor
                         apiKey={tinyMCEAPIKey}
-                        value={content}
+                        initialValue={content}
                         init={{
                             height: 300,
                             menubar: false,
@@ -230,7 +220,6 @@ export default function PostEdit() {
                 </form>
             </section>
 
-            {/* ─── Add a Comment ─── */}
             <section>
                 <h2 className="text-2xl font-bold mb-2">Add a Comment</h2>
                 <form onSubmit={handleAddComment} className="space-y-2">

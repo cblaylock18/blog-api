@@ -102,7 +102,7 @@ export default function NewPost() {
                 <label className="text-lg">Body</label>
                 <Editor
                     apiKey={tinyMCEAPIKey}
-                    initialValue={content || "<p>Start writing…</p>"}
+                    initialValue={content || ""}
                     init={{
                         height: 400,
                         menubar: false,
@@ -131,7 +131,7 @@ export default function NewPost() {
                             "alignleft aligncenter alignright alignjustify | " +
                             "bullist numlist outdent indent | removeformat | help",
                     }}
-                    onEditorChange={handleEditorChange}
+                    onEditorChange={(newHtml) => setContent(newHtml)}
                 />
 
                 <button
