@@ -195,7 +195,7 @@ export default function PostEdit() {
                     <label className="font-semibold">Body</label>
                     <Editor
                         apiKey={tinyMCEAPIKey}
-                        initialValue={content}
+                        value={content}
                         init={{
                             height: 300,
                             menubar: false,

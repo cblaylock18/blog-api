@@ -100,30 +100,14 @@ export default function NewPost() {
                 <label className="text-lg">Body</label>
                 <Editor
                     apiKey={tinyMCEAPIKey}
-                    onInit={(_, editor) => (editorRef.current = editor)}
-                    initialValue={content}
+                    value={content}
                     init={{
-                        height: 400,
+                        height: 300,
                         menubar: false,
                         plugins: [
-                            "advlist",
-                            "autolink",
-                            "lists",
-                            "link",
-                            "image",
-                            "charmap",
-                            "preview",
-                            "anchor",
-                            "searchreplace",
-                            "visualblocks",
-                            "code",
-                            "fullscreen",
-                            "insertdatetime",
-                            "media",
-                            "table",
-                            "paste",
-                            "help",
-                            "wordcount",
+                            "advlist autolink lists link image charmap preview anchor",
+                            "searchreplace visualblocks code fullscreen",
+                            "insertdatetime media table paste help wordcount",
                         ],
                         toolbar:
                             "undo redo | formatselect | bold italic backcolor | " +
