@@ -133,8 +133,7 @@ export default function CreateAccount() {
                         onChange={(e) => setAuthor(e.target.checked)}
                         className="mr-2 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                     />
-                    Would you like to be a blog author? If yes, you'll see a
-                    link to the secret blog author site!
+                    Would you like to be a blog author?
                 </label>
                 <button
                     type="submit"
