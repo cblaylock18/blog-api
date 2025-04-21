@@ -126,7 +126,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold mb-4">Your Blog Posts</h2>
             <Link
                 to="/new-post"
-                className="inline-block mb-6 rounded border px-4 py-2 hover:bg-gray-100"
+                className="inline-block mb-6 rounded border px-4 py-2 hover:bg-gray-500"
             >
                 + New Post
             </Link>
@@ -172,14 +172,14 @@ export default function Home() {
                                         post.published
                                     )}
                                     disabled={loadingMore}
-                                    className="px-3 py-1 border rounded hover:bg-grey-700 disabled:opacity-50"
+                                    className="px-3 py-1 border rounded hover:bg-gray-500 disabled:opacity-50 cursor-pointer"
                                 >
                                     {post.published ? "Unpublish" : "Publish"}
                                 </button>
                                 <button
                                     onClick={handleDelete(post.id)}
                                     disabled={loadingMore}
-                                    className="px-3 py-1 border rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
+                                    className="px-3 py-1 border rounded hover:bg-red-100 text-red-600 disabled:opacity-50 cursor-pointer"
                                 >
                                     Delete
                                 </button>
