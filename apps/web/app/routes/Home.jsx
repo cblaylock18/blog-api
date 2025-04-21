@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export function meta({}) {
@@ -29,6 +29,10 @@ export default function Home({ loaderData }) {
     const [error, setError] = useState(null);
 
     const batchSize = 10;
+
+    useEffect(() => {
+        console.log(apiUrl);
+    });
 
     const fetchMorePosts = async (e) => {
         e.preventDefault();
