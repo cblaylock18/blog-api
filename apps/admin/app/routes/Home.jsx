@@ -1,118 +1,201 @@
 import { Link, useNavigate } from "react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../components/AuthProvider";
-const apiUrl = import.meta.env.VITE_API_URL;
 
-export function meta({}) {
+const apiUrl = import.meta.env.VITE_API_URL;
+const pageSize = 10;
+
+export function meta() {
     return [
         { title: "Blog" },
-        { name: "description", content: "Welcome to the Blog API viewer!" },
+        { name: "description", content: "Your blog posts dashboard" },
     ];
 }
 
 export default function Home() {
-    const [posts, setPosts] = useState([]);
-    const [error, setError] = useState(null);
     const { user, token } = useAuth();
     const navigate = useNavigate();
 
+    const [posts, setPosts] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    const fetchPosts = useCallback(async () => {
+        setError(null);
+        setLoading(true);
+        try {
+            const res = await fetch(`${apiUrl}/author/post`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (!res.ok) throw data;
+            setPosts(data.allPosts);
+        } catch (err) {
+            setError(
+                err.errors ?? [{ msg: err.message || "Failed to load posts." }]
+            );
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
     useEffect(() => {
-        if (user === null) return;
-
-        if (!user?.author) {
-            return navigate("/edit-profile", { replace: true });
+        if (user === undefined) return;
+        if (!token || user === null) {
+            navigate("/login", { replace: true });
+            return;
         }
-
-        if (!token) {
-            return navigate("/login", { replace: true });
+        if (!user.author) {
+            navigate("/edit-profile", { replace: true });
+            return;
         }
+        fetchPosts();
+    }, [user, token, navigate, fetchPosts]);
 
-        (async () => {
-            try {
-                const res = await fetch(`${apiUrl}/author/post`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+    const handleToggle = (id, currentlyPublished) => async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            const res = await fetch(`${apiUrl}/author/post/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await res.json();
+            if (!res.ok) throw data;
+            setPosts((prev) =>
+                prev.map((p) =>
+                    p.id === id ? { ...p, published: !currentlyPublished } : p
+                )
+            );
+        } catch (err) {
+            setError(
+                err.errors ?? [
+                    { msg: err.message || "Failed to toggle publish." },
+                ]
+            );
+        }
+    };
 
-                if (!res.ok) throw await res.json();
-
-                const data = await res.json();
-
-                setPosts(data.allPosts);
-            } catch (err) {
-                setError(err.errors ?? [{ msg: err.message }]);
-            }
-        })();
-    }, [user, token, navigate]);
-
-    const batchSize = 10;
+    const handleDelete = (id) => async (e) => {
+        e.preventDefault();
+        setError(null);
+        try {
+            const res = await fetch(`${apiUrl}/author/post/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (!res.ok) throw data;
+            setPosts((prev) => prev.filter((p) => p.id !== id));
+        } catch (err) {
+            setError(
+                err.errors ?? [{ msg: err.message || "Failed to delete post." }]
+            );
+        }
+    };
 
     const fetchMorePosts = async (e) => {
         e.preventDefault();
-
-        const offset = posts.length;
-
-        const res = await fetch(
-            `${apiUrl}/post/?offset=${offset}&limit=${batchSize}`
-        );
-
-        const data = await res.json();
-
-        if (res.ok && data.allPosts) {
+        setError(null);
+        setLoadingMore(true);
+        try {
+            const res = await fetch(
+                `${apiUrl}/author/post?offset=${posts.length}&limit=${pageSize}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const data = await res.json();
+            if (!res.ok) throw data;
             setPosts((prev) => [...prev, ...data.allPosts]);
-        } else {
-            if (data.errors && Array.isArray(data.errors)) {
-                setError(data.errors);
-            } else {
-                setError(data.message || "Fetching more posts failed");
-            }
+        } catch (err) {
+            setError(
+                err.errors ?? [
+                    { msg: err.message || "Loading more posts failed." },
+                ]
+            );
+        } finally {
+            setLoadingMore(false);
         }
     };
 
     return (
-        <section>
-            <h2 className="text-3xl font-bold mb-10 p-6 pb-0">
-                Your Blog Posts
-            </h2>
+        <section className="container mx-auto p-6">
+            <h2 className="text-3xl font-bold mb-4">Your Blog Posts</h2>
             <Link
                 to="/new-post"
-                className="rounded-3xl border border-gray-200 p-4 m-10 text-2xl font-bold cursor-pointer dark:border-gray-700"
+                className="inline-block mb-6 rounded border px-4 py-2 hover:bg-gray-100"
             >
-                New Post
+                + New Post
             </Link>
-            <ul className="space-y-2 p-6">
-                {posts.map((post) => (
-                    <li
-                        key={post.id}
-                        className="rounded-3xl border border-white-200 p-4 mb-6 hover:scale-99 dark:border-white-700"
-                    >
-                        <Link to={`/post/${post.id}`}>
-                            <div className="flex">
-                                <h2 className="text-2xl font-semibold">
-                                    {post.title}
-                                </h2>
-                                <p className="ml-auto text-xl">
-                                    Published: {post.published ? "Yes" : "No"}
-                                </p>
-                            </div>
-                            <p className="pb-4">{post.author}</p>
-                            <p>{post.contentPreview}</p>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+
             {error &&
-                Array.isArray(error) &&
-                error.map((err, index) => (
-                    <p key={index} className="text-red-500 mb-4">
-                        {err.msg}
+                error.map((e, i) => (
+                    <p key={i} className="text-red-500 mb-2">
+                        {e.msg}
                     </p>
                 ))}
-            {posts.length % batchSize === 0 && posts.length > 0 && (
+
+            {loading ? (
+                <p>Loading posts…</p>
+            ) : posts.length === 0 ? (
+                <p>No posts yet — click “New Post” to get started.</p>
+            ) : (
+                <ul className="space-y-4">
+                    {posts.map((post) => (
+                        <li
+                            key={post.id}
+                            className="border rounded-lg p-4 flex flex-col space-y-2"
+                        >
+                            <div className="flex items-center">
+                                <Link
+                                    to={`/post/${post.id}`}
+                                    className="flex-1"
+                                >
+                                    <h3 className="text-2xl font-semibold">
+                                        {post.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">
+                                        {post.contentPreview}
+                                    </p>
+                                </Link>
+                                <span className="ml-4 text-sm">
+                                    {post.published ? "✅ Published" : "Draft"}
+                                </span>
+                            </div>
+                            <div className="flex space-x-2">
+                                <button
+                                    onClick={handleToggle(
+                                        post.id,
+                                        post.published
+                                    )}
+                                    disabled={loadingMore}
+                                    className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                                >
+                                    {post.published ? "Unpublish" : "Publish"}
+                                </button>
+                                <button
+                                    onClick={handleDelete(post.id)}
+                                    disabled={loadingMore}
+                                    className="px-3 py-1 border rounded hover:bg-red-100 text-red-600 disabled:opacity-50"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {posts.length % pageSize === 0 && posts.length > 0 && (
                 <button
                     onClick={fetchMorePosts}
-                    className="self-start bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 ml-6 mb-4 rounded cursor-pointer"
+                    disabled={loadingMore}
+                    className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
                 >
-                    Load 10 More Posts
+                    {loadingMore ? "Loading…" : "Load 10 More Posts"}
                 </button>
             )}
         </section>

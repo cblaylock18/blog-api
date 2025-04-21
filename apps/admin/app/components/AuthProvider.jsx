@@ -4,25 +4,31 @@ import { jwtDecode } from "jwt-decode";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
+    const [user, setUser] = useState();
+    const [token, setToken] = useState();
 
     useEffect(() => {
         const stored = localStorage.getItem("jwt");
-
         if (stored) {
             try {
                 const decoded = jwtDecode(stored);
-
                 if (decoded.exp * 1000 > Date.now()) {
                     setToken(stored);
                     setUser(decoded);
                 } else {
                     localStorage.removeItem("jwt");
+                    setToken(null);
+                    setUser(null);
                 }
             } catch {
                 localStorage.removeItem("jwt");
+                setToken(null);
+                setUser(null);
             }
+        } else {
+            // no token in storage
+            setToken(null);
+            setUser(null);
         }
     }, []);
 

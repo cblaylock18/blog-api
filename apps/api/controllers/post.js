@@ -1,14 +1,26 @@
 const prisma = require("../models");
 
+const createDOMPurify = require("dompurify");
+const { JSDOM } = require("jsdom");
+
+const window = new JSDOM("").window;
+const DOMPurify = createDOMPurify(window);
+
+function decodeEntities(html) {
+    const textarea = window.document.createElement("textarea");
+    textarea.innerHTML = html;
+    return textarea.textContent;
+}
+
 const postAllGet = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const offset = parseInt(req.query.offset, 10) || 0;
 
     try {
-        const allPosts = await prisma.$queryRaw`
+        const raw = await prisma.$queryRaw`
           SELECT "Post".id, 
                  "Post".title, 
-                 CONCAT(SUBSTRING("Post".content FROM 1 FOR 200),'...') AS "contentPreview", 
+                 SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview", 
                  CONCAT("User"."firstName", ' ', "User"."lastName") AS author, 
                  "Post"."updatedAt"
           FROM "Post"
@@ -17,6 +29,19 @@ const postAllGet = async (req, res, next) => {
           ORDER BY "Post"."updatedAt" DESC
           LIMIT ${limit} OFFSET ${offset};
         `;
+
+        const allPosts = raw.map((post) => {
+            const stripped = DOMPurify.sanitize(post.contentPreview, {
+                ALLOWED_TAGS: [],
+                ALLOWED_ATTR: [],
+            });
+
+            const decoded = decodeEntities(stripped);
+            return {
+                ...post,
+                contentPreview: decoded,
+            };
+        });
 
         return res.status(200).json({ allPosts });
     } catch (error) {

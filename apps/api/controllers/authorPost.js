@@ -9,6 +9,12 @@ const sanitizeRichText = (value) => {
     return DOMPurify.sanitize(value);
 };
 
+function decodeEntities(html) {
+    const textarea = window.document.createElement("textarea");
+    textarea.innerHTML = html;
+    return textarea.textContent;
+}
+
 const postValidator = [
     body("title")
         .trim()
@@ -34,16 +40,11 @@ const postAllGet = async (req, res, next) => {
     const offset = parseInt(req.query.offset, 10) || 0;
 
     try {
-        const allPosts = await prisma.$queryRaw`
+        const raw = await prisma.$queryRaw`
         SELECT 
           "Post".id,
           "Post".title,
-          regexp_replace(
-            SUBSTRING("Post".content FROM 1 FOR 200),
-            '<[^>]+>',
-            '',
-            'g'
-          ) AS "contentPreview",
+          SUBSTRING("Post".content FROM 1 FOR 200) AS "contentPreview",
           CONCAT("User"."firstName", ' ', "User"."lastName") AS author,
           "Post"."updatedAt",
           "Post".published
@@ -53,6 +54,19 @@ const postAllGet = async (req, res, next) => {
         ORDER BY "Post"."updatedAt" DESC
         LIMIT ${limit} OFFSET ${offset};
       `;
+
+        const allPosts = raw.map((post) => {
+            const stripped = DOMPurify.sanitize(post.contentPreview, {
+                ALLOWED_TAGS: [],
+                ALLOWED_ATTR: [],
+            });
+
+            const decoded = decodeEntities(stripped);
+            return {
+                ...post,
+                contentPreview: decoded,
+            };
+        });
 
         return res
             .status(200)

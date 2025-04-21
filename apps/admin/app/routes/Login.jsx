@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../components/AuthProvider";
+import { jwtDecode } from "jwt-decode";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -9,62 +10,78 @@ export function meta() {
 }
 
 export default function Login() {
+    const { user, login } = useAuth();
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
-    const { user, login } = useAuth();
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (user === undefined) return;
+        if (user) {
+            navigate("/", { replace: true });
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
+        setSubmitting(true);
 
-        const res = await fetch(`${apiUrl}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
+        try {
+            const res = await fetch(`${apiUrl}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await res.json();
 
-        const data = await res.json();
+            if (!res.ok) {
+                throw data;
+            }
 
-        if (res.ok && data.token) {
+            const decoded = jwtDecode(data.token);
             login(data.token);
-            if (!data.user.author) {
-                navigate("/edit-profile");
-            }
-            navigate("/");
-        } else {
-            if (data.errors && Array.isArray(data.errors)) {
-                setError(data.errors);
+
+            if (!decoded.author) {
+                navigate("/edit-profile", { replace: true });
             } else {
-                setError(data.message || "Login failed");
+                navigate("/", { replace: true });
             }
+        } catch (err) {
+            if (err.errors && Array.isArray(err.errors)) {
+                setError(err.errors);
+            } else {
+                setError([{ msg: err.message || "Login failed" }]);
+            }
+        } finally {
+            setSubmitting(false);
         }
     };
 
+    if (user === undefined) {
+        return <p className="p-6">Checking login status…</p>;
+    }
+
     return (
-        <main className="container mx-auto p-6">
+        <main className="container mx-auto p-6 max-w-md">
             <h1 className="text-3xl font-bold mb-4">Log In</h1>
+
             {error &&
-                Array.isArray(error) &&
-                error.map((err, index) => (
-                    <p key={index} className="text-red-500 mb-4">
+                error.map((err, idx) => (
+                    <p key={idx} className="text-red-500 mb-2">
                         {err.msg}
                     </p>
                 ))}
-            {user ? (
-                ""
-            ) : (
-                <p className="text-red-500 mb-4">
-                    Must be logged in to access this site.
-                </p>
-            )}
+
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <label htmlFor="email" className="text-xl">
-                    Username (Your Email)
+                    Email
                 </label>
                 <input
                     id="email"
-                    name="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -72,12 +89,12 @@ export default function Login() {
                     autoComplete="username"
                     required
                 />
+
                 <label htmlFor="password" className="text-xl">
                     Password
                 </label>
                 <input
                     id="password"
-                    name="password"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -85,11 +102,14 @@ export default function Login() {
                     autoComplete="current-password"
                     required
                 />
+
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                    disabled={submitting}
+                    className={`bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600
+            ${submitting ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                    Log In
+                    {submitting ? "Logging in…" : "Log In"}
                 </button>
             </form>
         </main>
