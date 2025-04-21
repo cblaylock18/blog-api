@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../components/AuthProvider";
 import { Editor } from "@tinymce/tinymce-react";
@@ -13,6 +13,7 @@ export function meta() {
 export default function NewPost() {
     const { token } = useAuth();
     const navigate = useNavigate();
+    const editorRef = useRef(null);
 
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
@@ -26,10 +27,6 @@ export default function NewPost() {
             navigate("/login", { replace: true });
         }
     }, [token, navigate]);
-
-    const handleEditorChange = (newContent) => {
-        setContent(newContent);
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,10 +42,8 @@ export default function NewPost() {
                 },
                 body: JSON.stringify({ title, content, published }),
             });
-
             const data = await res.json();
             if (!res.ok) throw data;
-
             navigate(`/post/${data.post.id}`, { replace: true });
         } catch (err) {
             setError(
@@ -61,6 +56,9 @@ export default function NewPost() {
 
     if (token === undefined) {
         return <p className="p-6">Checking authentication…</p>;
+    }
+    if (token === null) {
+        return null;
     }
 
     return (
@@ -102,7 +100,8 @@ export default function NewPost() {
                 <label className="text-lg">Body</label>
                 <Editor
                     apiKey={tinyMCEAPIKey}
-                    initialValue={content || ""}
+                    onInit={(_, editor) => (editorRef.current = editor)}
+                    initialValue={content}
                     init={{
                         height: 400,
                         menubar: false,
@@ -137,8 +136,9 @@ export default function NewPost() {
                 <button
                     type="submit"
                     disabled={submitting}
-                    className={`mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600
-            ${submitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`mt-4 bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 ${
+                        submitting ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                     {submitting ? "Submitting…" : "Submit Post"}
                 </button>
