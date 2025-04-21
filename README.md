@@ -43,12 +43,12 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 
 ## Live Demo
 
--   **Public Reader:** https://public-blog.vercel.app
--   **Author Admin:** https://admin-blog.vercel.app
--   **API (Railway):** https://blog-api.up.railway.app
+-   **Public Reader:** https://blog-api-five-olive.vercel.app/
+-   **Author Admin:** https://blog-api-14ej.vercel.app/
+-   **API (On Railway)**
 
-![Public Reader Screenshot](./apps/web/public/screenshots/reader.png)  
-![Author Admin Screenshot](./apps/admin/public/screenshots/admin.png)
+![Public Reader Screenshot](./apps/web/public/web-view-screenshot.png)  
+![Author Admin Screenshot](./apps/admin/public/admin-screenshot.png)
 
 ---
 
