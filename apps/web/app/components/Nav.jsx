@@ -16,7 +16,17 @@ export function Nav() {
                         <li>
                             <NavLink to="/edit-profile">Profile</NavLink>
                         </li>
-                        {user.author ? <a href="/">Blog Author Site</a> : ""}
+                        {user.author ? (
+                            <a
+                                href="https://blog-api-14ej.vercel.app/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Blog Author Site
+                            </a>
+                        ) : (
+                            ""
+                        )}
                         <button onClick={logout} className="cursor-pointer">
                             Log Out
                         </button>
