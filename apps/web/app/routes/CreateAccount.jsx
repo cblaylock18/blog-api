@@ -129,7 +129,7 @@ export default function CreateAccount() {
                         className="mr-2 w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                     />
                     Would you like to be a blog author? If yes, you'll see a
-                    link to the secret blog author site!
+                    link to the secret blog author site in the Nav Bar!
                 </label>
                 <button
                     type="submit"

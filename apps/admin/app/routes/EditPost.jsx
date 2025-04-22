@@ -27,6 +27,9 @@ export default function PostEdit() {
     const [newBody, setNewBody] = useState("");
     const [posting, setPosting] = useState(false);
 
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
     useEffect(() => {
         if (token === undefined) return;
         if (!token) {
@@ -77,6 +80,9 @@ export default function PostEdit() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        setSaved(false);
+        setSaving(true);
+
         try {
             const res = await fetch(`${apiUrl}/author/post/${postId}`, {
                 method: "PUT",
@@ -88,9 +94,12 @@ export default function PostEdit() {
             });
             const data = await res.json();
             if (!res.ok) throw data;
-            navigate(`/post/${postId}`, { replace: true });
+
+            setSaved(true);
         } catch (err) {
             setError(err.errors ?? [{ msg: err.message || "Update failed." }]);
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -213,11 +222,25 @@ export default function PostEdit() {
                     />
                     <button
                         type="submit"
-                        className="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+                        disabled={saving}
+                        className={`mt-2 px-4 py-2 font-semibold rounded 
+    ${
+        saving
+            ? "bg-green-300 cursor-not-allowed"
+            : "bg-green-600 hover:bg-green-700 text-white"
+    }`}
                     >
-                        Save Changes
+                        {saving ? "Saving…" : "Save Changes"}
                     </button>
                 </form>
+                {saved && (
+                    <div
+                        role="alert"
+                        className="mb-4 rounded border border-green-400 bg-green-100 px-4 py-3 text-green-700"
+                    >
+                        ✔️ Changes saved!
+                    </div>
+                )}
             </section>
 
             <section>
@@ -242,7 +265,6 @@ export default function PostEdit() {
                 </form>
             </section>
 
-            {/* ─── Comments List ─── */}
             <section>
                 <h2 className="text-2xl font-bold mb-4">Comments</h2>
                 {loadingComments ? (
