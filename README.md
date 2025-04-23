@@ -1,6 +1,6 @@
 # Blog Platform (API + Public Reader + Author Admin)
 
-A full‑stack blog project with a dedicated backend API, a public reader site, and an author/admin site.
+A full-stack **headless Blog API** built with **Node.js, Express, PostgreSQL** and **Prisma**, powering two React frontends: a **public reader site** and an **author/admin site** for post management and comment moderation.
 
 ## Table of Contents
 
@@ -15,29 +15,29 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 
 ## Features
 
-### Backend (apps/api)
+### **Back End (apps/api)**
 
--   **RESTful CRUD** for posts & comments
--   **JWT Authentication** (Passport.js & jsonwebtoken)
--   **Express Validation** & centralized error handling
--   **Prisma ORM** with PostgreSQL & migrations
--   **CORS** configured for both frontends
+-   **RESTful CRUD** endpoints for **posts** and **comments**
+-   **JWT Authentication** with **Passport.js** & **jsonwebtoken**
+-   **Input validation** via **express-validator** and centralized error handling
+-   **Prisma ORM** for schema modeling, migrations, and querying
+-   Configured **CORS** to allow both frontends
 
-### Public Reader (apps/web)
+### **Public Reader (apps/web)**
 
--   Browse **published posts**
--   Read full post with comments
--   **User login** via JWT (stored in localStorage)
--   Leave, edit & delete **own comments**
--   Data loading with **React Router Framework v7** loaders & actions
+-   Browse **published posts** with summaries and full content
+-   **User login/logout** via JWT (stored in localStorage)
+-   **Comment management**: leave, edit & delete your own comments
+-   Data loading & mutations with **React Router Framework v7** loaders/actions
+-   Responsive UI styled with **Tailwind CSS**
 
-### Author Admin (apps/admin)
+### **Author Admin (apps/admin)**
 
--   List **all posts** (draft & published)
--   Create & edit posts with **TinyMCE** rich‑text editor
+-   View **all posts** (draft & published)
+-   **Create & edit** posts using **TinyMCE** rich-text editor
 -   **Publish/unpublish** via PATCH endpoint
 -   **Moderate comments** (delete any)
--   Client‑side data fetching with React hooks & React Router
+-   Client-side fetching with **React hooks** & **React Router**
 
 ---
 
@@ -45,7 +45,7 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 
 -   **Public Reader:** https://blog-api-five-olive.vercel.app/
 -   **Author Admin:** https://blog-api-14ej.vercel.app/
--   **API (On Railway)**
+-   **API (Railway)**
 
 ![Public Reader Screenshot](./apps/web/public/web-view-screenshot.png)  
 ![Author Admin Screenshot](./apps/admin/public/admin-screenshot.png)
@@ -54,7 +54,7 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 
 ## Technologies Used
 
-### Back End (apps/api)
+### **Back End (apps/api)**
 
 -   Node.js & Express.js
 -   PostgreSQL & Prisma ORM
@@ -62,35 +62,35 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 -   express-validator
 -   CORS
 
-### Public Frontend (apps/web)
+### **Public Frontend (apps/web)**
 
 -   Vite & React
 -   React Router Framework v7
 -   Tailwind CSS
--   React hooks
+-   React Hooks
 
-### Admin Frontend (apps/admin)
+### **Admin Frontend (apps/admin)**
 
 -   Vite & React
 -   React Router Framework v7
--   TinyMCE rich‑text editor
+-   TinyMCE rich-text editor
 -   Tailwind CSS
 
-### Deployment & Dev Tools
+### **Deployment & Dev Tools**
 
--   Railway (API hosting)
+-   Railway (API & database hosting)
 -   Vercel (frontends)
--   dotenv for env‑vars
+-   dotenv for environment variables
 -   Git & GitHub
 
 ---
 
 ## Future Improvements
 
--   **Search & Filtering** on reader side
--   **Markdown Support** option
--   **Granular Roles** (admin, moderator, reader)
+-   **Search & Filtering** on reader site
 -   **Email Notifications** on new comments
+-   **Role-based Access** (admin, moderator, reader)
+-   **Rate Limiting** to prevent spam
 
 ---
 
@@ -98,11 +98,13 @@ A full‑stack blog project with a dedicated backend API, a public reader site, 
 
 Contributions are welcome!
 
-1. Fork the repository.
-2. Create your feature branch: git checkout -b feature/your-feature
-3. Commit your changes: git commit -m 'Add a cool feature'
-4. Push to the branch: git push origin feature/your-feature
-5. Open a Pull Request.
+1. Fork this repository
+2. Create your feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'Add a cool feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Open a Pull Request
+
+---
 
 ## License
 
